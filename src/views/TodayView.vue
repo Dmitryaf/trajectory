@@ -1,0 +1,609 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import ChipGroup from '../components/ChipGroup.vue';
+import DurationInput from '../components/DurationInput.vue';
+import HowItWorksDialog from '../components/HowItWorksDialog.vue';
+import ScalePicker from '../components/ScalePicker.vue';
+import AutoGrowTextarea from '../components/AutoGrowTextarea.vue';
+import { experimentTextLimits } from '../features/experiments/model';
+import { useDailyEntryForm } from '../features/daily-entry/useDailyEntryForm';
+import { useAppStore } from '../stores/app';
+import { addDays, endOfWeek, formatDate, formatMinutes, startOfWeek, todayKey } from '../services/dates';
+import { buildObservations, entriesForWeek, summarize } from '../services/analytics';
+import {
+  actionDirectionEntryOptions,
+  activityOptions,
+  careerOptions,
+  experimentAppliesToDate,
+  externalCareerIdsForOptions,
+  contextFactorOptions,
+  legacyContextFactorOptions,
+  legacyActivityOptions,
+  legacyCareerOptions,
+  lifeAreaOptions,
+  nutritionOptions,
+  specialDayOptions,
+  type ActionDirectionId,
+  type ActivityId,
+  type CareerState,
+  type DailyEntry,
+  type DailyRecordedFieldId,
+  type LifeAreaId,
+  type NutritionState,
+} from '../types';
+
+const store = useAppStore();
+const {
+  selectedDate,
+  sleepDurationMinutes,
+  timeInBedDurationMinutes,
+  weightKg,
+  saved,
+  validationMessage,
+  form,
+  hasSavedEntry,
+  isDirty,
+  entryChangeNotice,
+  saveButtonText,
+  saveButtonDisabled,
+  blockIsActive,
+  changeSelectedDate,
+  selectDate,
+  save,
+} = useDailyEntryForm(store);
+
+const careerItems = computed(() => {
+  const usedIds = new Set([
+    ...store.dailyEntries.flatMap((entry) => entry.careerStates),
+    ...store.dailyEntries.flatMap((entry) => (entry.careerState ? [entry.careerState] : [])),
+    ...form.careerStates,
+  ]);
+  return Array.from(
+    new Map(
+      [
+        ...careerOptions,
+        ...store.settings.customCareerOptions.filter((option) => !option.archived),
+        ...legacyCareerOptions.filter((option) => usedIds.has(option.id)),
+      ].map((option) => [option.id, option]),
+    ).values(),
+  );
+});
+const activityItems = computed(() => {
+  const configured = [
+    ...activityOptions.filter((option) => !store.settings.hiddenActivityIds.includes(option.id)),
+    ...store.settings.customActivityOptions.filter((option) => !option.archived),
+  ];
+  const configuredIds = new Set(configured.map((option) => option.id));
+  const historical = Array.from(
+    new Map(
+      [...activityOptions, ...legacyActivityOptions, ...store.settings.customActivityOptions].map((option) => [option.id, option]),
+    ).values(),
+  ).filter((option) => form.activities.includes(option.id) && !configuredIds.has(option.id));
+  return [...configured, ...historical];
+});
+const contextFactorItems = computed(() => [
+  ...contextFactorOptions.filter((option) => !store.settings.hiddenContextFactorIds.includes(option.id)),
+  ...store.settings.customContextFactorOptions.filter((option) => !option.archived),
+  ...legacyContextFactorOptions.filter((option) => form.contextFactors.includes(option.id)),
+]);
+const actionDirectionItems = computed(() =>
+  form.actionDirection === 'recovery'
+    ? [...actionDirectionEntryOptions, { id: 'recovery' as const, label: 'Восстановление (старая отметка)', icon: '◌' }]
+    : actionDirectionEntryOptions,
+);
+const lifeAreaItems = computed(() => [...lifeAreaOptions, ...store.settings.customLifeAreaOptions]);
+const activeLifeOptions = computed(() => lifeAreaItems.value.filter((option) => store.settings.activeLifeAreas.includes(option.id)));
+const isToday = computed(() => selectedDate.value === todayKey());
+const isFirstEntry = computed(() => store.loaded && store.dailyEntries.length === 0);
+const firstUseTakesPriority = computed(() => false);
+const hasSelectedFocus = computed(() => Boolean((form.focusTitle || store.settings.activeFocusTitle).trim()));
+const hasRecordedGoalAction = computed(() => form.recordedFields.includes('actionDirection'));
+const showGoalActionChoices = computed(() => hasSelectedFocus.value || hasRecordedGoalAction.value);
+const showLifeAreas = computed(() => activeLifeOptions.value.length > 0 || form.lifeAreas.length > 0 || form.lifeAreasRecorded);
+const currentWeekEntries = computed(() => entriesForWeek(store.dailyEntries, todayKey()));
+const externalCareerIds = computed(() => externalCareerIdsForOptions(store.settings.customCareerOptions));
+const currentWeekSummary = computed(() => summarize(currentWeekEntries.value, externalCareerIds.value));
+const currentWeekObservation = computed(() => buildObservations(currentWeekEntries.value, contextFactorItems.value)[0]);
+const isWeekReviewWindow = computed(() => isToday.value && todayKey() >= addDays(endOfWeek(todayKey()), -1));
+const experimentAppliesToSelectedDate = computed(() => {
+  return experimentAppliesToDate(store.settings.experiment, selectedDate.value);
+});
+const hasAdditionalDayBlocks = computed(
+  () =>
+    blockIsActive('career') ||
+    blockIsActive('movement') ||
+    blockIsActive('nutrition') ||
+    showLifeAreas.value ||
+    experimentAppliesToSelectedDate.value,
+);
+const reviewReminders = computed(() =>
+  [
+    isWeekReviewWindow.value &&
+    currentWeekSummary.value.ordinaryCoveredEntriesCount >= 4 &&
+    currentWeekSummary.value.ordinaryCoreEntriesCount >= 2 &&
+    !store.reviewByWeek(startOfWeek(todayKey()))
+      ? {
+          id: 'week',
+          title: 'Неделя готова к разбору',
+          text: `${currentWeekSummary.value.ordinaryCoveredEntriesCount} заполненных дней уже достаточно для короткого обзора.`,
+          to: '/week',
+          label: 'Открыть неделю',
+        }
+      : null,
+  ].filter((item): item is { id: string; title: string; text: string; to: string; label: string } => item !== null),
+);
+const activeReviewReminder = computed(() => reviewReminders.value[0] ?? null);
+const currentWeeklyPlan = computed(() => store.reviewByWeek(startOfWeek(todayKey()))?.ifThenPlan.trim() ?? '');
+const yesterday = computed(() => addDays(todayKey(), -1));
+const yesterdayMissing = computed(
+  () => isToday.value && store.loaded && store.dailyEntries.length > 0 && !store.entryByDate(yesterday.value),
+);
+
+function fillYesterday() {
+  changeSelectedDate(yesterday.value);
+}
+
+function setContextFactors(value: string | string[] | null) {
+  form.contextFactors = Array.isArray(value) ? (value as DailyEntry['contextFactors']) : [];
+  form.contextFactorsRecorded = true;
+  markRecorded('contextFactors');
+}
+
+function setActivities(value: string | string[] | null) {
+  form.activities = Array.isArray(value) ? (value as ActivityId[]) : [];
+  form.activitiesRecorded = true;
+  markRecorded('activities');
+}
+
+function setLifeAreas(value: string | string[] | null) {
+  form.lifeAreas = Array.isArray(value) ? (value as LifeAreaId[]) : [];
+  form.lifeAreasRecorded = true;
+  markRecorded('lifeAreas');
+}
+
+function setCareerStates(value: string | string[] | null) {
+  form.careerStates = Array.isArray(value) ? (value as CareerState[]) : [];
+  form.careerState = form.careerStates[0] ?? null;
+  markRecorded('careerStates');
+}
+
+function setActionDirection(value: string | string[] | null) {
+  form.actionDirection = typeof value === 'string' ? (value as ActionDirectionId) : null;
+  if (form.actionDirection) markRecorded('actionDirection');
+  else unmarkRecorded('actionDirection');
+}
+
+function setNoActionDirection() {
+  form.actionDirection = null;
+  form.actionNote = '';
+  markRecorded('actionDirection');
+}
+
+function setNutritionState(value: string | string[] | null) {
+  form.nutritionState = typeof value === 'string' ? (value as NutritionState) : null;
+  if (form.nutritionState) markRecorded('nutritionState');
+  else unmarkRecorded('nutritionState');
+}
+
+function markRecorded(field: DailyRecordedFieldId) {
+  if (!form.recordedFields.includes(field)) form.recordedFields.push(field);
+}
+
+function unmarkRecorded(field: DailyRecordedFieldId) {
+  form.recordedFields = form.recordedFields.filter((item) => item !== field);
+}
+</script>
+
+<template>
+  <section class="page page--today">
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">Ежедневная запись</span>
+        <h1>{{ isToday ? 'Сегодня' : formatDate(selectedDate, { day: 'numeric', month: 'long', weekday: 'long' }) }}</h1>
+      </div>
+      <label class="entry-date-picker">
+        <span>Запись за дату</span>
+        <input :value="selectedDate" class="date-input" type="date" :max="todayKey()" aria-label="Дата записи" @change="selectDate" />
+        <small>Можно выбрать любой прошедший день</small>
+      </label>
+    </div>
+
+    <section v-if="isFirstEntry && !firstUseTakesPriority" class="first-entry-guide" aria-label="Первая запись">
+      <div>
+        <span class="eyebrow">С чего начать</span>
+        <h2>Отметьте несколько деталей сегодняшнего дня</h2>
+        <p>Не нужно заполнять всё. Разделы на главной можно добавить или убрать в настройках — уже сохранённые записи не пропадут.</p>
+      </div>
+      <div class="first-entry-guide__actions">
+        <HowItWorksDialog button-label="Зачем это заполнять?" inline />
+      </div>
+    </section>
+
+    <div v-else-if="!firstUseTakesPriority && !isFirstEntry" class="daily-layout-settings">
+      <span>Хотите добавить или убрать разделы?</span>
+    </div>
+
+    <section v-if="!firstUseTakesPriority && !isFirstEntry && entryChangeNotice" class="entry-change-notice" aria-live="polite">
+      <strong>{{ hasSavedEntry ? 'Изменения не сохранены' : 'Новая запись не сохранена' }}</strong>
+      <p>{{ entryChangeNotice }}</p>
+    </section>
+
+    <section v-else-if="!firstUseTakesPriority && activeReviewReminder" class="review-nudge" aria-label="Период готов к обзору">
+      <div>
+        <strong>{{ activeReviewReminder.title }}</strong>
+        <p>{{ activeReviewReminder.text }}</p>
+      </div>
+      <RouterLink class="secondary-button context-action" :to="activeReviewReminder.to">{{ activeReviewReminder.label }}</RouterLink>
+    </section>
+
+    <section v-else-if="!firstUseTakesPriority && yesterdayMissing" class="recovery-nudge" aria-label="Вчера без записи">
+      <div>
+        <strong>Вчера без записи</strong>
+        <p>Можно заполнить коротко сейчас или спокойно продолжить с сегодняшнего дня.</p>
+      </div>
+      <button class="secondary-button context-action" type="button" @click="fillYesterday">Добавить запись</button>
+    </section>
+
+    <section v-else-if="!firstUseTakesPriority && isToday && currentWeeklyPlan" class="today-pulse" aria-label="Текущий план недели">
+      <div>
+        <span class="eyebrow">План недели</span>
+        <p>{{ currentWeeklyPlan }}</p>
+      </div>
+    </section>
+
+    <section
+      v-else-if="!firstUseTakesPriority && isToday && currentWeekSummary.coveredEntriesCount"
+      class="today-pulse"
+      aria-label="Пульс недели"
+    >
+      <div>
+        <span class="eyebrow">Пульс недели</span>
+        <p>
+          {{ currentWeekSummary.coveredEntriesCount }}
+          {{ currentWeekSummary.coveredEntriesCount === 1 ? 'заполненный день' : 'заполненных дней' }} · сон
+          {{ formatMinutes(currentWeekSummary.averageSleep === null ? null : Math.round(currentWeekSummary.averageSleep)) }} ·
+          {{ currentWeekSummary.externalActionDays }} дн. с шагом к цели
+        </p>
+      </div>
+      <p v-if="currentWeekObservation">{{ currentWeekObservation.text }}</p>
+    </section>
+
+    <form v-if="!firstUseTakesPriority" class="checkin-grid" :class="{ 'checkin-grid--dirty': isDirty }" @submit.prevent="save">
+      <div v-if="blockIsActive('sleep') || blockIsActive('context')" class="checkin-group-heading">
+        <span>Состояние и условия</span>
+      </div>
+      <article v-if="blockIsActive('sleep')" id="sleep" class="form-card form-card--sleep form-card--wide">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--purple">◒</span>
+          <div>
+            <h2>Сон и состояние</h2>
+            <p v-if="isFirstEntry">Сон перед этой датой и сколько сил было в этот день.</p>
+          </div>
+        </div>
+        <p class="field-hint">Время в кровати посчитается по времени отбоя и подъёма. «Примерно спал» — ваша оценка самого сна.</p>
+        <div class="sleep-field-grid">
+          <div>
+            <label class="field-label" for="bedtime">Лёг спать</label>
+            <input id="bedtime" v-model="form.bedtime" type="time" />
+          </div>
+          <div>
+            <label class="field-label" for="wake-time">Встал</label>
+            <input id="wake-time" v-model="form.wakeTime" type="time" />
+          </div>
+          <div>
+            <label class="field-label" for="sleep-hours">Примерно спал</label>
+            <DurationInput id="sleep-hours" v-model="sleepDurationMinutes" :max-hours="16" />
+          </div>
+          <div>
+            <label class="field-label" for="time-in-bed-hours">В кровати</label>
+            <DurationInput id="time-in-bed-hours" v-model="timeInBedDurationMinutes" :max-hours="18" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-control">
+            <label class="field-label">Качество сна</label><ScalePicker v-model="form.sleepQuality" low-label="плохо" high-label="хорошо" />
+          </div>
+          <div class="form-control">
+            <label class="field-label">Энергия за день</label
+            ><ScalePicker v-model="form.energy" low-label="нет сил" high-label="много сил" />
+          </div>
+        </div>
+        <p v-if="validationMessage" class="field-error" role="alert">{{ validationMessage }}</p>
+      </article>
+
+      <article v-if="blockIsActive('context')" id="day-conditions" class="form-card form-card--context form-card--wide">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--orange">⌁</span>
+          <div>
+            <h2>Что могло повлиять на день</h2>
+            <p v-if="isFirstEntry">Отметьте условия, которые стоит сравнить с другими днями.</p>
+          </div>
+        </div>
+        <div class="factor-block">
+          <label class="field-label">Повторяющиеся условия</label>
+          <ChipGroup :model-value="form.contextFactors" :options="contextFactorItems" multiple @update:model-value="setContextFactors" />
+          <button
+            class="none-option"
+            :class="{ selected: form.contextFactorsRecorded && !form.contextFactors.length }"
+            type="button"
+            @click="setContextFactors([])"
+          >
+            Ничего из списка
+          </button>
+        </div>
+        <label class="field-label" for="context-note">Короткое пояснение</label>
+        <textarea
+          id="context-note"
+          v-model="form.contextNote"
+          rows="3"
+          maxlength="400"
+          placeholder="Например: поздний кофе, тревога, шум, перегруз или частые пробуждения"
+        ></textarea>
+        <div class="context-special-day">
+          <label class="field-label">Необычный день</label>
+          <p class="field-hint">Эта отметка помогает не смешивать особые обстоятельства с обычными днями.</p>
+          <ChipGroup v-model="form.specialDay" :options="specialDayOptions" allow-clear />
+          <template v-if="form.specialDay">
+            <label class="field-label" for="special-day-note">Короткое уточнение</label>
+            <input
+              id="special-day-note"
+              v-model="form.specialDayNote"
+              type="text"
+              maxlength="120"
+              placeholder="Например: перелёт, простуда, дедлайн или семейное событие"
+            />
+          </template>
+        </div>
+      </article>
+
+      <div class="checkin-group-heading">
+        <span>Текущая цель</span>
+      </div>
+      <article id="goal-actions" class="form-card form-card--direction form-card--wide">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--blue">⌁</span>
+          <div>
+            <h2>Шаг по текущей цели</h2>
+            <p>
+              {{
+                hasSelectedFocus
+                  ? `Текущая цель: ${form.focusTitle || store.settings.activeFocusTitle}`
+                  : hasRecordedGoalAction
+                    ? 'Для этой записи цель не была сохранена.'
+                    : 'Сначала выберите, над чем сейчас хотите работать.'
+              }}
+            </p>
+          </div>
+        </div>
+        <template v-if="showGoalActionChoices">
+          <p class="field-hint">Что лучше всего описывает этот день относительно выбранной цели?</p>
+          <ChipGroup
+            :model-value="form.actionDirection"
+            :options="actionDirectionItems"
+            allow-clear
+            @update:model-value="setActionDirection"
+          />
+          <button
+            class="none-option"
+            :class="{ selected: form.recordedFields.includes('actionDirection') && form.actionDirection === null }"
+            type="button"
+            @click="setNoActionDirection"
+          >
+            Шага по цели не было
+          </button>
+          <p v-if="form.actionDirection === 'recovery'" class="data-note">
+            Это значение сохранено из старой записи. Для новых дней восстановление отмечается в активности или условиях дня.
+          </p>
+          <template v-if="form.actionDirection">
+            <label class="field-label" for="goal-action-note">Что именно произошло?</label>
+            <textarea
+              id="goal-action-note"
+              v-model="form.actionNote"
+              rows="2"
+              maxlength="180"
+              placeholder="Коротко опишите одно действие или полученный результат"
+            ></textarea>
+          </template>
+          <details
+            v-if="
+              form.focusOutcomeCriterion ||
+              store.settings.focusOutcomeCriterion ||
+              form.focusReviewDate ||
+              store.settings.focusReviewDate ||
+              form.externalEvidenceCriterion ||
+              store.settings.externalEvidenceCriterion
+            "
+            class="analysis-range goal-context-details"
+          >
+            <summary>Показать критерии цели</summary>
+            <div class="analysis-range__content">
+              <p v-if="form.focusOutcomeCriterion || store.settings.focusOutcomeCriterion" class="form-context">
+                Как понять, что получилось: {{ form.focusOutcomeCriterion || store.settings.focusOutcomeCriterion }}
+              </p>
+              <p v-if="form.focusReviewDate || store.settings.focusReviewDate" class="form-context">
+                Проверить цель:
+                {{ formatDate(form.focusReviewDate || store.settings.focusReviewDate, { day: 'numeric', month: 'long', year: 'numeric' }) }}
+              </p>
+              <p v-if="form.externalEvidenceCriterion || store.settings.externalEvidenceCriterion" class="form-context">
+                Что считать шагом: {{ form.externalEvidenceCriterion || store.settings.externalEvidenceCriterion }}
+              </p>
+            </div>
+          </details>
+        </template>
+        <div v-else class="empty-block-note">
+          <p>После выбора цели здесь можно будет отмечать конкретные шаги, подготовку или дни, занятые другими делами.</p>
+        </div>
+      </article>
+
+      <div v-if="hasAdditionalDayBlocks" class="checkin-group-heading">
+        <span>Остальные части дня</span>
+      </div>
+      <article v-if="blockIsActive('career')" id="career" class="form-card">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--blue">↗</span>
+          <div>
+            <h2>Рабочий контекст</h2>
+            <p>Что было частью рабочего дня. Эта отметка сама по себе не считается шагом по текущей цели.</p>
+          </div>
+        </div>
+        <ChipGroup
+          :model-value="form.careerStates as CareerState[]"
+          :options="careerItems"
+          multiple
+          @update:model-value="setCareerStates"
+        />
+        <button
+          class="none-option"
+          :class="{ selected: form.recordedFields.includes('careerStates') && !form.careerStates.length }"
+          type="button"
+          @click="setCareerStates([])"
+        >
+          Ничего из списка
+        </button>
+        <p class="data-note">Конкретное действие по выбранной цели записывается только в блоке выше.</p>
+      </article>
+
+      <article v-if="blockIsActive('movement')" id="movement" class="form-card">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--green">△</span>
+          <div>
+            <h2>Физическая активность</h2>
+            <p v-if="isFirstEntry">Отметьте, была ли сегодня активность и какая.</p>
+          </div>
+        </div>
+        <ChipGroup :model-value="form.activities as ActivityId[]" :options="activityItems" multiple @update:model-value="setActivities" />
+        <button
+          class="none-option"
+          :class="{ selected: form.activitiesRecorded && !form.activities.length }"
+          type="button"
+          @click="setActivities([])"
+        >
+          Без активности
+        </button>
+      </article>
+
+      <article v-if="blockIsActive('nutrition')" id="nutrition" class="form-card form-card--nutrition">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--green">◐</span>
+          <div>
+            <h2>Питание</h2>
+            <p>
+              {{
+                form.nutritionCriterion ||
+                store.settings.nutritionGoalCriterion ||
+                'Отметьте, как прошёл день относительно вашего ориентира в питании.'
+              }}
+            </p>
+          </div>
+        </div>
+        <ChipGroup :model-value="form.nutritionState" :options="nutritionOptions" allow-clear @update:model-value="setNutritionState" />
+        <div class="sleep-field-grid">
+          <div>
+            <label class="field-label" for="weight-kg">Вес</label>
+            <div class="number-field">
+              <input
+                id="weight-kg"
+                v-model.number="weightKg"
+                type="number"
+                min="30"
+                max="250"
+                step="0.1"
+                inputmode="decimal"
+                placeholder="82.4"
+              />
+              <span>кг</span>
+            </div>
+          </div>
+        </div>
+        <textarea
+          v-model="form.nutritionNote"
+          rows="2"
+          maxlength="180"
+          placeholder="Например: много перекусов вечером, ел по плану, пропустил нормальный ужин"
+        ></textarea>
+      </article>
+
+      <article v-if="showLifeAreas" id="life-areas" class="form-card">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--amber">✦</span>
+          <div>
+            <h2>Области жизни</h2>
+            <p v-if="isFirstEntry">Что было заметной частью этого дня. Это не оценка успешности.</p>
+          </div>
+        </div>
+        <ChipGroup :model-value="form.lifeAreas as LifeAreaId[]" :options="activeLifeOptions" multiple @update:model-value="setLifeAreas" />
+        <button
+          class="none-option"
+          :class="{ selected: form.lifeAreasRecorded && !form.lifeAreas.length }"
+          type="button"
+          @click="setLifeAreas([])"
+        >
+          Ничего не отмечаю
+        </button>
+      </article>
+
+      <article v-if="experimentAppliesToSelectedDate" id="experiment" class="form-card form-card--experiment">
+        <div class="form-card__heading">
+          <span class="section-icon section-icon--orange">⌁</span>
+          <div>
+            <h2>Эксперимент</h2>
+            <p>{{ store.settings.experiment.title }}</p>
+          </div>
+        </div>
+        <p v-if="store.settings.experiment.hypothesis" class="form-context">
+          Что хотите узнать: {{ store.settings.experiment.hypothesis }}
+        </p>
+        <label class="field-label">Сегодня получилось это сделать?</label>
+        <div class="binary-choice">
+          <button type="button" :class="{ selected: form.experimentCompleted === true }" @click="form.experimentCompleted = true">
+            Да
+          </button>
+          <button type="button" :class="{ selected: form.experimentCompleted === false }" @click="form.experimentCompleted = false">
+            Нет
+          </button>
+          <button type="button" :class="{ selected: form.experimentCompleted === null }" @click="form.experimentCompleted = null">
+            Нет отметки
+          </button>
+        </div>
+        <label class="field-label" for="experiment-note">Что помогло или помешало? <span class="field-optional">необязательно</span></label>
+        <AutoGrowTextarea
+          id="experiment-note"
+          v-model="form.experimentNote"
+          :rows="2"
+          :max-length="experimentTextLimits.dailyNote"
+          placeholder="Например: заранее убрал телефон; поздний звонок сбил план"
+        />
+      </article>
+
+      <div class="checkin-group-heading">
+        <span>Короткий итог дня</span>
+      </div>
+      <article class="form-card">
+        <div class="form-card__heading">
+          <span class="section-icon">·</span>
+          <div>
+            <h2>Заметка дня</h2>
+            <p v-if="isFirstEntry">Что сегодня произошло или что вы заметили — даже если день был обычным.</p>
+          </div>
+        </div>
+        <textarea
+          v-model="form.importantFact"
+          rows="2"
+          maxlength="240"
+          placeholder="Например: после прогулки стало легче собраться с мыслями"
+        ></textarea>
+      </article>
+
+      <button class="primary-button primary-button--save" type="submit" :disabled="saveButtonDisabled">
+        <span>{{ saveButtonText }}</span
+        ><span>{{ saved ? '✓' : '→' }}</span>
+      </button>
+      <Transition name="mobile-save">
+        <button v-if="isDirty" class="primary-button mobile-save-button" type="submit" :disabled="saveButtonDisabled">
+          <span>{{ saveButtonText }}</span
+          ><span aria-hidden="true">→</span>
+        </button>
+      </Transition>
+    </form>
+  </section>
+</template>
