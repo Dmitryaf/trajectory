@@ -254,10 +254,10 @@ function unmarkRecorded(field: DailyRecordedFieldId) {
     <section
       v-else-if="!firstUseTakesPriority && isToday && currentWeekSummary.coveredEntriesCount"
       class="today-pulse"
-      aria-label="Пульс недели"
+      aria-label="Сводка текущей недели"
     >
       <div>
-        <span class="eyebrow">Пульс недели</span>
+        <span class="eyebrow">На этой неделе</span>
         <p>
           {{ currentWeekSummary.coveredEntriesCount }}
           {{ currentWeekSummary.coveredEntriesCount === 1 ? 'заполненный день' : 'заполненных дней' }} · сон
@@ -442,7 +442,7 @@ function unmarkRecorded(field: DailyRecordedFieldId) {
         <div class="form-card__heading">
           <span class="section-icon section-icon--blue">↗</span>
           <div>
-            <h2>Рабочий контекст</h2>
+            <h2>Что было частью работы</h2>
             <p>Что было частью рабочего дня. Эта отметка сама по себе не считается шагом по текущей цели.</p>
           </div>
         </div>

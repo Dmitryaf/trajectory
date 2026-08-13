@@ -34,8 +34,8 @@ export function buildReviewCues(
     id: 'coverage',
     title: enoughEntries ? 'Данных достаточно для обзора' : 'Данных пока мало',
     text: enoughEntries
-      ? `${summary.ordinaryCoveredEntriesCount} заполненных дней, из них ${summary.ordinaryCoreEntriesCount} с основными полями, уже дают рабочую картину периода.`
-      : `Для рабочего обзора лучше иметь хотя бы ${minTarget} без отметки «особый день». Сейчас: ${summary.ordinaryCoveredEntriesCount} и ${summary.ordinaryCoreEntriesCount}.`,
+      ? `${summary.ordinaryCoveredEntriesCount} заполненных дней, из них ${summary.ordinaryCoreEntriesCount} с основными полями. Этого уже достаточно для короткого обзора.`
+      : `Для короткого обзора лучше иметь хотя бы ${minTarget} без отметки «особый день». Сейчас: ${summary.ordinaryCoveredEntriesCount} и ${summary.ordinaryCoreEntriesCount}.`,
     tone: enoughEntries ? 'good' : 'warning',
   });
 
@@ -50,7 +50,7 @@ export function buildReviewCues(
       tone: 'warning',
     });
   } else if (summary.averageSleep !== null) {
-    cues.push({ id: 'sleep-baseline', title: 'База сна', text: sleepContextText(summary), tone: 'neutral' });
+    cues.push({ id: 'sleep-baseline', title: 'Средний сон', text: sleepContextText(summary), tone: 'neutral' });
   }
 
   const timingVariation = Math.max(summary.bedtimeVariationMinutes ?? 0, summary.wakeTimeVariationMinutes ?? 0);
@@ -58,7 +58,7 @@ export function buildReviewCues(
     cues.push({
       id: 'sleep-regularity',
       title: 'Время сна заметно менялось',
-      text: `Разброс времени отхода ко сну или подъёма около ${Math.round(timingVariation)} мин. Это отдельный контекст помимо длительности сна.`,
+      text: `Время отхода ко сну или подъёма различалось примерно на ${Math.round(timingVariation)} мин. Посмотрите на режим отдельно от длительности сна.`,
       tone: 'neutral',
     });
   }
@@ -87,7 +87,7 @@ export function buildReviewCues(
     cues.push({
       id: 'direction-preparation',
       title: 'Много подготовки, мало конкретных действий',
-      text: `${summary.preparationDays} ${plural(summary.preparationDays, 'день', 'дня', 'дней')} отмечены как подготовка, конкретных действий — ${summary.externalActionDays}. Проверь, приводит ли подготовка к заметному результату.`,
+      text: `${summary.preparationDays} ${plural(summary.preparationDays, 'день', 'дня', 'дней')} отмечены как подготовка, конкретных действий — ${summary.externalActionDays}. Проверьте, приводит ли подготовка к заметному результату.`,
       tone: 'warning',
     });
   } else if (summary.externalActionDays >= 2) {
@@ -112,7 +112,7 @@ export function buildReviewCues(
     cues.push({
       id: 'results',
       title: 'Есть завершённые вещи',
-      text: `${results.length} ${plural(results.length, 'итог', 'итога', 'итогов')} за период. Это отдельный слой прогресса, даже если состояние было неровным.`,
+      text: `${results.length} ${plural(results.length, 'итог', 'итога', 'итогов')} за период. Их важно учитывать, даже если самочувствие менялось.`,
       tone: 'good',
     });
   }
@@ -124,7 +124,7 @@ export function buildReviewCues(
       text:
         summary.nutritionBlockDays >= 2
           ? `${summary.nutritionBlockDays} ${plural(summary.nutritionBlockDays, 'день', 'дня', 'дней')} питание отмечено как мешающее цели. Лучше искать один повторяющийся сценарий, а не менять всё сразу.`
-          : `${summary.nutritionSupportDays} ${plural(summary.nutritionSupportDays, 'день', 'дня', 'дней')} питание поддерживало цель. Это стоит сохранить как рабочее условие.`,
+          : `${summary.nutritionSupportDays} ${plural(summary.nutritionSupportDays, 'день', 'дня', 'дней')} питание поддерживало цель. Это можно попробовать сохранить.`,
       tone: summary.nutritionBlockDays >= 2 ? 'warning' : 'good',
     });
   }
@@ -141,7 +141,7 @@ export function buildReviewCues(
   if (summary.specialDays || lifeEvents.length) {
     cues.push({
       id: 'context',
-      title: 'Есть поправка на контекст',
+      title: 'Были необычные дни и события',
       text: `${summary.specialDays} особых ${plural(summary.specialDays, 'день', 'дня', 'дней')} и ${lifeEvents.length} ${plural(lifeEvents.length, 'важное событие', 'важных события', 'важных событий')}. Такой период лучше не сравнивать с обычным ритмом напрямую.`,
       tone: 'neutral',
     });
@@ -169,7 +169,7 @@ export function buildRangeReviewCues(
 
   cues.push({
     id: 'coverage',
-    title: enoughEntries ? 'Период покрыт достаточно ровно' : 'Покрытие периода неровное',
+    title: enoughEntries ? 'Записи есть в большинстве месяцев' : 'Записи распределены по месяцам неравномерно',
     text: `${summary.coveredEntriesCount} заполненных дней, из них ${summary.ordinaryCoreEntriesCount} с основными полями, в ${monthsWithData} из ${rangeMonths} мес.`,
     tone: enoughEntries ? 'good' : 'warning',
   });
@@ -179,7 +179,7 @@ export function buildRangeReviewCues(
     const comparison = factorComparisonText(factor);
     cues.push({
       id: 'factor',
-      title: 'Устойчивый фактор дня',
+      title: 'Условие повторялось',
       text: `${factor.label} отмечался ${factor.count} ${plural(factor.count, 'раз', 'раза', 'раз')}.${comparison ? ` ${comparison}` : ' Сравнительных данных пока мало.'}`,
       tone: 'neutral',
     });
@@ -199,8 +199,8 @@ export function buildRangeReviewCues(
     } else if (externalRate >= 35) {
       cues.push({
         id: 'direction-external',
-        title: 'Конкретные действия сохранялись',
-        text: `Конкретные действия появлялись в ${externalRate}% дней с отметкой по текущей цели. Сверь это с итогами периода.`,
+        title: 'Конкретные действия повторялись',
+        text: `Конкретные действия появлялись в ${externalRate}% дней с отметкой по текущей цели. Сверьте это с итогами периода.`,
         tone: 'good',
       });
     }
@@ -208,7 +208,7 @@ export function buildRangeReviewCues(
       cues.push({
         id: 'direction-drift',
         title: 'Другие занятия часто вытесняли цель',
-        text: `${driftRate}% дней с отметкой по текущей цели были заняты другим. Ищи повторяющееся условие, а не одну причину всего периода.`,
+        text: `${driftRate}% дней с отметкой по текущей цели были заняты другим. Ищите повторяющееся условие, а не одну причину всего периода.`,
         tone: 'warning',
       });
     }
@@ -218,7 +218,7 @@ export function buildRangeReviewCues(
     cues.push({
       id: 'results',
       title: 'Есть завершённые итоги',
-      text: `${results.length} ${plural(results.length, 'итог', 'итога', 'итогов')} за период. Сопоставь их с реальными шагами, а не только с занятостью.`,
+      text: `${results.length} ${plural(results.length, 'итог', 'итога', 'итогов')} за период. Сопоставьте их с реальными шагами, а не только с занятостью.`,
       tone: 'good',
     });
   }
@@ -226,8 +226,8 @@ export function buildRangeReviewCues(
   if (summary.specialDays || lifeEvents.length) {
     cues.push({
       id: 'context',
-      title: 'Динамика менялась вместе с контекстом',
-      text: `${summary.specialDays} особых ${plural(summary.specialDays, 'день', 'дня', 'дней')} и ${lifeEvents.length} ${plural(lifeEvents.length, 'важное событие', 'важных события', 'важных событий')}. Они исключены из базовых средних состояния.`,
+      title: 'Были необычные дни и важные события',
+      text: `${summary.specialDays} особых ${plural(summary.specialDays, 'день', 'дня', 'дней')} и ${lifeEvents.length} ${plural(lifeEvents.length, 'важное событие', 'важных события', 'важных событий')}. Они не входят в средние значения для обычных дней.`,
       tone: 'neutral',
     });
   }
@@ -260,7 +260,7 @@ function sleepContextText(summary: PeriodSummary): string {
   const sleep = summary.averageSleep === null ? '—' : formatMinutes(Math.round(summary.averageSleep));
   const inBed = summary.averageTimeInBed === null ? '' : `, в кровати ${formatMinutes(Math.round(summary.averageTimeInBed))}`;
   const efficiency = summary.averageSleepEfficiency === null ? '' : `, доля сна около ${Math.round(summary.averageSleepEfficiency)}%`;
-  return `Средний сон за период: ${sleep}${inBed}${efficiency}. Это первый контекст для оценки энергии и действий.`;
+  return `Средний сон за период: ${sleep}${inBed}${efficiency}. Сравнивая энергию и действия, сначала учитывайте сон.`;
 }
 
 function plural(value: number, one: string, few: string, many: string): string {

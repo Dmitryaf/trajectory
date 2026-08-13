@@ -415,7 +415,7 @@ async function saveReview() {
       >
         <PeriodRecordCard
           v-if="results.length"
-          eyebrow="Завершённые факты"
+          eyebrow="Сделано за неделю"
           title="Итоги недели"
           :items="resultRecordItems"
           :breakdown="resultAreaSummary"
@@ -425,7 +425,7 @@ async function saveReview() {
 
         <PeriodRecordCard
           v-if="lifeEvents.length"
-          eyebrow="Важный контекст"
+          eyebrow="Важные события"
           title="События недели"
           :items="eventRecordItems"
           :breakdown="eventTypeSummary"
@@ -444,7 +444,7 @@ async function saveReview() {
         </div>
         <template v-if="previousReview?.nextLever || previousReview?.ifThenPlan">
           <div class="previous-plan">
-            <span class="eyebrow">Решение из прошлого обзора</span>
+            <span class="eyebrow">Решение на прошлую неделю</span>
             <p v-if="previousReview.nextLever"><strong>Вы решили:</strong> {{ previousReview.nextLever }}</p>
             <p v-if="previousReview.ifThenPlan"><strong>План:</strong> {{ previousReview.ifThenPlan }}</p>
           </div>
@@ -456,7 +456,7 @@ async function saveReview() {
           ></textarea>
         </template>
         <details class="period-details review-context-details" :open="reviewContextOpen" @toggle="updateReviewContextOpen">
-          <summary>{{ reviewHasContext ? 'Итоги и контекст' : 'Добавить итоги и контекст' }}</summary>
+          <summary>{{ reviewHasContext ? 'Итоги и важные условия' : 'Добавить итоги и важные условия' }}</summary>
           <div class="period-details__content">
             <label class="field-label">До трёх итогов или сделанных дел</label>
             <input
@@ -484,7 +484,7 @@ async function saveReview() {
         </details>
         <label class="field-label">Что продолжить или изменить на следующей неделе?</label
         ><textarea v-model="review.nextLever" rows="2" placeholder="Можно продолжить как есть или пока ничего не решать"></textarea>
-        <label class="field-label">План если-то</label
+        <label class="field-label">План «если — то»</label
         ><textarea
           v-model="review.ifThenPlan"
           rows="2"
@@ -500,7 +500,7 @@ async function saveReview() {
       </section>
 
       <details v-if="hasDailyData || hasJournalData" class="period-details week-data-details" :open="!hasDailyData">
-        <summary>{{ hasDailyData ? 'Показать дни и дополнительный контекст' : 'Записи недели' }}</summary>
+        <summary>{{ hasDailyData ? 'Показать дни и дополнительные записи' : 'Записи недели' }}</summary>
         <div class="period-details__content">
           <article v-if="hasDailyData" class="dashboard-card">
             <div class="section-heading">
@@ -528,7 +528,7 @@ async function saveReview() {
           <article v-if="hasDailyData && experimentCards.length" class="dashboard-card">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Личные проверки</span>
+                <span class="eyebrow">Что вы проверяли</span>
                 <h2>Эксперименты недели</h2>
               </div>
               <span class="count-badge">{{ experimentCards.length }}</span>
@@ -624,7 +624,7 @@ async function saveReview() {
           <article v-if="hasDailyData && specialDays.length" class="dashboard-card">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Поправка на контекст</span>
+                <span class="eyebrow">Необычные дни</span>
                 <h2>Особые дни</h2>
               </div>
               <span class="count-badge">{{ specialDays.length }}</span>
@@ -662,8 +662,8 @@ async function saveReview() {
           <article v-if="hasDailyData" class="dashboard-card">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Присутствие областей</span>
-                <h2>Карта недели</h2>
+                <span class="eyebrow">Что занимало дни</span>
+                <h2>Что было заметно по дням</h2>
               </div>
             </div>
             <div class="heatmap" :style="{ '--day-count': days.length }">

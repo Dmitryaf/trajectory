@@ -1,16 +1,16 @@
 # Trajectory
 
-Trajectory is a local-first reflection and personal analytics product. It helps people turn short daily observations into careful weekly and longer-term decisions without treating correlation as causation.
+Trajectory helps people record a few facts about each day, review a week, see changes over time, and choose a useful next step. It does not score days or guess why something happened.
 
 ![Trajectory weekly reflection](docs/screenshots/trajectory-profile-cover.png)
 
 **Vue 3 · TypeScript · Pinia · Dexie · ECharts · PWA**
 
-The core flow stays intentionally small: record what mattered today, review a completed week, inspect longer-term patterns, and choose a useful next step. Every field is optional, and incomplete data remains visible rather than being filled with assumptions.
+The main flow is small: record what mattered today, review a completed week, look at longer-term changes, and choose what to do next. Every field is optional. Missing entries stay missing instead of being replaced with guesses.
 
 ## Why Trajectory
 
-Daily notes are easy to collect and hard to interpret. Trajectory connects observations to periodic reflection while preserving the difference between missing data, unusual days, and ordinary patterns. Comparisons expose their sample sizes and avoid presenting associations as proven causes.
+It is easy to remember a whole week by its last or strongest feeling. Trajectory places daily notes, completed work, important events, and wellbeing next to each other. Every comparison shows how many records it uses, and the app never presents a coincidence as a proven cause.
 
 ```mermaid
 flowchart LR
@@ -21,18 +21,18 @@ flowchart LR
 
 ## How it works
 
-- **Today:** capture sleep, energy, context, actions, life areas, and one factual note without requiring every field.
-- **Week:** combine coverage, noteworthy observations, completed outcomes, special days, and one next decision.
-- **History:** inspect longer-term change, monthly metrics, and equal-window comparisons around important events.
+- **Today:** record sleep, energy, daily conditions, actions, life areas, and one short note. Every field is optional.
+- **Week:** see the recorded days, completed work, important events, unusual days, and one decision for the next week.
+- **History:** follow important events and decisions, view monthly values, and compare equal periods before and after an event.
 
 ## Engineering highlights
 
-- **Local-first persistence.** Pinia coordinates application state while Dexie persists user edits in IndexedDB across reloads.
-- **Explicit boundaries.** Domain normalization, application orchestration, Vue presentation, analytics, and persistence have separate responsibilities enforced by import rules.
-- **Analytics before visualization.** Pure calculation modules produce summaries and comparisons; Vue and ECharts render the results independently.
-- **Honest data semantics.** Calculations preserve missing values, sample sizes, incomplete periods, and special-day exclusions.
-- **Responsive PWA behavior.** The shell provides route-level code splitting, service-worker updates, offline-capable local data, and stale-chunk recovery.
-- **Reproducible test data.** The application, unit tests, browser tests, and screenshots share one deterministic synthetic-data generator.
+- **Local data.** Pinia manages application state, while Dexie keeps edits in IndexedDB across reloads.
+- **Clear code boundaries.** Import rules keep data normalization, application flows, Vue components, calculations, and storage separate.
+- **Calculations separate from charts.** Plain TypeScript modules build summaries and comparisons; Vue and ECharts only display them.
+- **Missing data stays missing.** Calculations keep gaps, record counts, incomplete periods, and unusual days visible.
+- **Offline-ready PWA.** The app supports local data, service-worker updates, route-level loading, and recovery after an outdated deployment.
+- **Repeatable demo data.** The app, automated tests, and screenshots use the same fixed data generator.
 
 ## Product walkthrough
 
@@ -46,19 +46,19 @@ The mobile-first entry keeps the current week visible while allowing the user to
 
 ### Week
 
-The weekly view combines data coverage, cautious review cues, completed outcomes, important context, and the next-decision workflow.
+The weekly view places recorded days, completed work, important events, and a few careful observations on one screen.
 
 ![Trajectory weekly review with coverage and reflection cues](docs/screenshots/trajectory-week-review.png)
 
 ### Next decision
 
-The review closes the loop by comparing the previous decision with what actually happened, then keeping one next step and an optional if-then plan.
+The review shows the previous decision and what happened afterwards. The user can then save one next step and an optional “if–then” plan.
 
 ![Trajectory weekly decision and if-then plan](docs/screenshots/trajectory-week-decision.png)
 
 ### History
 
-Longer-term views place observation counts and interpretation boundaries alongside calculated trends.
+History shows monthly values together with the number of records used. It marks incomplete periods and does not claim that an event caused a change.
 
 ![Trajectory change history and monthly sleep trend](docs/screenshots/trajectory-trends.png)
 
@@ -78,19 +78,19 @@ See [the architecture overview](docs/architecture.md) for module responsibilitie
 
 ## Explore the code
 
-- [Domain normalization](src/model/normalization.ts) preserves compatibility and the meaning of missing values.
-- [Analytics modules](src/features/analytics) keep calculations independent from presentation.
-- [Dexie schema](src/db.ts) and [application store](src/stores/app.ts) show the local persistence boundary.
-- [Daily-entry feature](src/features/daily-entry) contains the application flow for short daily observations.
-- [Demo bootstrap](src/demo/bootstrap.ts) and [data generator](scripts/generate-demo-data.mjs) provide a reproducible, validated baseline.
+- [Data normalization](src/model/normalization.ts) keeps old records compatible and preserves missing values.
+- [Analytics modules](src/features/analytics) keep calculations separate from the interface.
+- [Dexie schema](src/db.ts) and [application store](src/stores/app.ts) show how local data is stored.
+- [Daily-entry feature](src/features/daily-entry) contains the flow for short daily records.
+- [Demo bootstrap](src/demo/bootstrap.ts) and [data generator](scripts/generate-demo-data.mjs) create the same validated starting data every time.
 
 ## Local data and reset
 
-On first launch, an empty IndexedDB database receives a validated synthetic snapshot. Later edits remain local, and **Сбросить демо-данные** restores the reproducible baseline. No credentials, backend, or account are required.
+On first launch, the app adds fixed demo data to an empty IndexedDB database. Later edits stay on the device, and **Сбросить демо-данные** restores the original demo. No account or server is required.
 
 ## Testing
 
-The focused suite covers domain and daily-entry behavior, analytics semantics, versioned import, data generation and bootstrap, a representative Vue surface, local persistence, and navigation to analytics.
+The test suite covers daily records, calculations, versioned import, demo data, key Vue components, local storage, and navigation.
 
 ```powershell
 npm.cmd run lint

@@ -38,7 +38,7 @@ const {
       <div>
         <span class="eyebrow">3–12 месяцев</span>
         <h1>История изменений</h1>
-        <p>Смотрите, какие события, решения и итоги меняли вашу траекторию.</p>
+        <p>Смотрите важные события, решения и итоги по месяцам.</p>
       </div>
     </div>
 
@@ -75,8 +75,8 @@ const {
           </article>
         </div>
         <p class="data-note history-coverage-note">
-          Основа разбора: {{ summary.coveredEntriesCount }} дней с записями, {{ summary.ordinaryCoreEntriesCount }} обычных дней с основными
-          полями. Пропуски не заполняются.
+          В обзоре учтено {{ summary.coveredEntriesCount }} дней с записями. В {{ summary.ordinaryCoreEntriesCount }} обычных днях заполнены
+          основные поля. Пропуски остаются пропусками.
         </p>
       </article>
 
@@ -117,7 +117,7 @@ const {
           <article v-if="trendMetricOptions.length" class="dashboard-card dashboard-card--trend">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Динамика периода</span>
+                <span class="eyebrow">Изменение по месяцам</span>
                 <h2>{{ selectedTrendMetricInfo?.label }}</h2>
               </div>
               <small>{{ selectedTrendMetricInfo?.samples }} наблюдений · минимум два месяца</small>
@@ -135,13 +135,13 @@ const {
             </div>
             <EChartPanel :option="trendMetricOption" :height="300" :aria-label="`Динамика: ${selectedTrendMetricInfo?.label}`" />
             <p class="data-note trend-chart-description">
-              Показаны месячные средние и важные события. Совпадение изменений во времени не доказывает причину; текущий месяц может быть
-              неполным.
+              Показаны средние значения по месяцам и важные события. Если изменения произошли рядом по времени, это ещё не значит, что одно
+              вызвало другое. Текущий месяц может быть неполным.
             </p>
           </article>
           <div v-else class="period-review-note trends-chart-guide">
-            <strong>Для графика пока мало сопоставимых данных</strong>
-            <p>Нужны наблюдения хотя бы в двух месяцах: 6 для сна или энергии либо 3 измерения веса.</p>
+            <strong>Для графика пока мало данных</strong>
+            <p>Нужны записи хотя бы в двух месяцах: 6 для сна или энергии либо 3 измерения веса.</p>
           </div>
         </div>
       </details>
@@ -216,8 +216,8 @@ const {
               </div>
               <p v-else class="period-review-note">Для сравнения показателей нужно минимум по три наблюдения до и после события.</p>
               <p class="data-note">
-                День события исключён. Показываются только показатели с достаточным числом наблюдений; совпадение во времени не означает
-                причинный эффект.
+                День события не учитывается. Показаны только значения, для которых достаточно записей. Это сравнение не доказывает, что
+                событие вызвало изменения.
               </p>
             </template>
             <p v-else class="empty-copy">После события пока не прошло ни одного полного дня для сравнения.</p>
