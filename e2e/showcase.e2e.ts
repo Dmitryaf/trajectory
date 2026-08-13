@@ -52,7 +52,7 @@ test('persists a daily note in IndexedDB across reloads', async ({ page }) => {
 test('navigates through Week and Trends and captures representative analytics', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto(`/week?week=${completedWeek()}`);
+  await page.goto(`/#/week?week=${completedWeek()}`);
   await expect(page.getByRole('heading', { name: 'Неделя', level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'На что обратить внимание' })).toBeVisible();
   await settleScreenshot(page);

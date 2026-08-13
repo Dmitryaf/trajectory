@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { registerSW } from 'virtual:pwa-register';
 import App from './App.vue';
 import './style.css';
@@ -17,7 +17,7 @@ window.addEventListener('vite:preloadError', (event) => {
 registerSW({ immediate: true });
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   scrollBehavior(to) {
     if (to.hash) return { el: to.hash, top: 88, behavior: 'smooth' };
     return { top: 0 };

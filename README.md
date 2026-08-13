@@ -6,6 +6,10 @@ Trajectory helps people record a few facts about each day, review a week, see ch
 
 **Vue 3 · TypeScript · Pinia · Dexie · ECharts · PWA**
 
+**[Open the live demo](https://dmitryaf.github.io/trajectory/)** · [Source code](https://github.com/Dmitryaf/trajectory)
+
+The demo uses synthetic data and stores later changes only in this browser. It does not require an account or connect to the production service.
+
 The main flow is small: record what mattered today, review a completed week, look at longer-term changes, and choose what to do next. Every field is optional. Missing entries stay missing instead of being replaced with guesses.
 
 ## Why Trajectory
@@ -110,6 +114,10 @@ npm.cmd run dev
 ```
 
 The synthetic data asset is generated automatically before development, production builds, and Playwright runs.
+
+## Deployment
+
+GitHub Actions publishes the validated demo build to GitHub Pages after changes reach `main`. The deployed app uses the `/trajectory/` base path and hash-based routes so that every screen remains available on static hosting.
 
 ## Public and production editions
 
