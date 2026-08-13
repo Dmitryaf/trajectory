@@ -13,7 +13,10 @@ beforeEach(async () => {
   await db.delete();
   await db.open();
   setActivePinia(createPinia());
-  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(buildDemoPayload(anchor)), { status: 200 })));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => new Response(JSON.stringify(buildDemoPayload(anchor)), { status: 200 })),
+  );
 });
 
 afterAll(async () => {

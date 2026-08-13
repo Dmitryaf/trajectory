@@ -24,6 +24,14 @@ test('bootstraps the synthetic Today state and captures the mobile screen', asyn
   await expect(page.getByRole('heading', { name: 'Сегодня', level: 1 })).toBeVisible();
   await expect(page.getByText('Первый час без уведомлений')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Сбросить демо-данные' })).toBeVisible();
+  const navigation = page.locator('.bottom-nav');
+  const lastNavigationItem = navigation.locator('.bottom-nav__item').last();
+  await expect(navigation.locator('.bottom-nav__item')).toHaveCount(3);
+  const navigationBox = await navigation.boundingBox();
+  const lastNavigationItemBox = await lastNavigationItem.boundingBox();
+  expect(navigationBox).not.toBeNull();
+  expect(lastNavigationItemBox).not.toBeNull();
+  expect(navigationBox!.x + navigationBox!.width - (lastNavigationItemBox!.x + lastNavigationItemBox!.width)).toBeLessThanOrEqual(8);
   await settleScreenshot(page);
   await page.locator('.demo-controls').evaluate((element) => ((element as HTMLElement).style.visibility = 'hidden'));
   await page.screenshot({ path: 'docs/screenshots/trajectory-today-mobile.png' });
@@ -50,8 +58,22 @@ test('navigates through Week and Trends and captures representative analytics', 
   await settleScreenshot(page);
   await page.screenshot({ path: 'docs/screenshots/trajectory-week-review.png' });
 
+  const review = page.locator('#week-review');
+  await expect(review).toBeVisible();
+  const reviewContext = review.locator('.review-context-details');
+  if ((await reviewContext.getAttribute('open')) !== null) await reviewContext.locator('summary').click();
+  await review.screenshot({
+    path: 'docs/screenshots/trajectory-week-decision.png',
+    style: '.bottom-nav { display: none !important; }',
+  });
+
+  await page.setViewportSize({ width: 1400, height: 600 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await settleScreenshot(page);
+  await page.screenshot({ path: 'docs/screenshots/trajectory-profile-cover.png' });
+
   await page.setViewportSize({ width: 1440, height: 1050 });
-  await page.getByRole('link', { name: 'Тренды' }).click();
+  await page.getByRole('link', { name: 'История' }).click();
   await expect(page.getByRole('heading', { name: 'История изменений', level: 1 })).toBeVisible();
   await page.getByText('Показать один показатель по месяцам').click();
   await expect(page.locator('[aria-label^="Динамика:"]')).toBeVisible();

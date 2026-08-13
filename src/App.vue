@@ -25,7 +25,7 @@ onMounted(async () => {
 const navItems = [
   { to: '/', label: 'Сегодня', icon: '●' },
   { to: '/week', label: 'Неделя', icon: '▦' },
-  { to: '/trends', label: 'Тренды', icon: '≋' },
+  { to: '/trends', label: 'История', icon: '≋' },
 ];
 </script>
 

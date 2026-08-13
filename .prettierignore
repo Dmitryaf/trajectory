@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+public/demo/*.json
+public/sw.js
+public/workbox-*.js

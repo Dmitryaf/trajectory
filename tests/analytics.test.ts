@@ -52,6 +52,10 @@ describe('personal analytics semantics', () => {
       }),
     );
 
-    expect(buildObservations(entries).map((item) => item.text).join(' ')).toContain('Это связь, а не доказанная причина.');
+    expect(
+      buildObservations(entries)
+        .map((item) => item.text)
+        .join(' '),
+    ).toContain('Это связь, а не доказанная причина.');
   });
 });

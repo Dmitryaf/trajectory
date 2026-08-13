@@ -2,7 +2,7 @@
 
 Trajectory is a local-first reflection and personal analytics product. It helps people turn short daily observations into careful weekly and longer-term decisions without treating correlation as causation.
 
-![Trajectory weekly reflection](docs/screenshots/trajectory-week-review.png)
+![Trajectory weekly reflection](docs/screenshots/trajectory-profile-cover.png)
 
 **Vue 3 · TypeScript · Pinia · Dexie · ECharts · PWA**
 
@@ -23,7 +23,7 @@ flowchart LR
 
 - **Today:** capture sleep, energy, context, actions, life areas, and one factual note without requiring every field.
 - **Week:** combine coverage, noteworthy observations, completed outcomes, special days, and one next decision.
-- **Trends:** inspect longer-term change, monthly metrics, and equal-window comparisons around important events.
+- **History:** inspect longer-term change, monthly metrics, and equal-window comparisons around important events.
 
 ## Engineering highlights
 
@@ -50,7 +50,13 @@ The weekly view combines data coverage, cautious review cues, completed outcomes
 
 ![Trajectory weekly review with coverage and reflection cues](docs/screenshots/trajectory-week-review.png)
 
-### Trends
+### Next decision
+
+The review closes the loop by comparing the previous decision with what actually happened, then keeping one next step and an optional if-then plan.
+
+![Trajectory weekly decision and if-then plan](docs/screenshots/trajectory-week-decision.png)
+
+### History
 
 Longer-term views place observation counts and interpretation boundaries alongside calculated trends.
 
@@ -88,6 +94,7 @@ The focused suite covers domain and daily-entry behavior, analytics semantics, v
 
 ```powershell
 npm.cmd run lint
+npm.cmd run format:check
 npm.cmd test
 npm.cmd run build
 npm.cmd run test:e2e
@@ -106,4 +113,4 @@ The synthetic data asset is generated automatically before development, producti
 
 ## Public and production editions
 
-This repository contains the public, local-first edition of Trajectory. Production authentication, cloud synchronization, backend infrastructure, private data, internal documentation, and private development history are intentionally kept outside this repository.
+This repository contains an interactive public showcase of Trajectory. It presents the three core local-first scenarios — Today, Week, and History — while production authentication, cloud synchronization, the monthly review, journals, settings, backend infrastructure, private data, internal documentation, and private development history remain outside this repository.

@@ -596,7 +596,7 @@
     bottom: max(8px, env(safe-area-inset-bottom));
     transform: none;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2px;
     padding: 6px;
     border-radius: 18px;

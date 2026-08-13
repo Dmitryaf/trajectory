@@ -14,7 +14,7 @@ Dexie local persistence
 
 ## Responsibilities
 
-- `src/views` and `src/components` render Today, Week, and Trends and coordinate user interaction.
+- `src/views` and `src/components` render Today, Week, and History and coordinate user interaction.
 - `src/features/daily-entry` owns daily form behavior and validation.
 - `src/features/analytics` contains pure summaries, review cues, trend calculations, and equal-window event comparisons.
 - `src/model` defines schemas, defaults, compatibility normalization, and the distinction between missing and recorded values.
