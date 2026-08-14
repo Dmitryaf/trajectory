@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
-import PeriodNavigator from '../components/PeriodNavigator.vue';
-import PeriodRecordCard from '../components/PeriodRecordCard.vue';
-import ArchivePagination from '../features/journal/ArchivePagination.vue';
-import WeeklyReviewOverview from '../components/WeeklyReviewOverview.vue';
+import ArchivePagination from '../features/journal/ui/ArchivePagination.vue';
+import PeriodRecordCard from '../features/reviews/ui/PeriodRecordCard.vue';
+import WeeklyReviewOverview from '../features/reviews/ui/WeeklyReviewOverview.vue';
+import PeriodNavigator from '../shared/ui/navigation/PeriodNavigator.vue';
 import {
   actionDirectionLabel,
   buildReviewCues,

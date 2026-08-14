@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildEventComparison } from '../src/features/analytics/eventComparison';
-import { buildObservations } from '../src/features/analytics/observations';
-import { summarize } from '../src/features/analytics/periodSummary';
-import { emptyDailyEntry, type DailyEntry } from '../src/types';
+import { emptyDailyEntry, type DailyEntry } from '../../../types';
+import { buildEventComparison } from '../eventComparison';
+import { buildObservations } from '../observations';
+import { summarize } from '../periodSummary';
 
 function entry(date: string, patch: Partial<DailyEntry>): DailyEntry {
   return { ...emptyDailyEntry(date), specialDay: null, ...patch };

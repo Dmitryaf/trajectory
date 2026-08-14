@@ -59,8 +59,8 @@ export default tseslint.config(
               group: [
                 '../views/**',
                 '../../views/**',
-                '../components/**',
-                '../../components/**',
+                '../shared/**',
+                '../../shared/**',
                 '../features/**',
                 '../../features/**',
                 '../services/**',
@@ -101,7 +101,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['../views/**', '../../views/**', '../components/**', '../../components/**', '../stores/**', '../../stores/**'],
+              group: ['../views/**', '../../views/**', '../shared/**', '../../shared/**', '../stores/**', '../../stores/**'],
               message: 'Общий сервис не должен зависеть от UI или состояния страницы.',
             },
           ],
@@ -117,7 +117,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['../views/**', '../../views/**', '../components/**', '../../components/**'],
+              group: ['../views/**', '../../views/**', '../shared/**', '../../shared/**'],
               message: 'Store не должен зависеть от UI.',
             },
           ],
@@ -126,15 +126,15 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/components/**/*.{ts,vue}'],
+    files: ['src/shared/**/*.{ts,vue}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              group: ['../views/**', '../../views/**'],
-              message: 'Компонент не должен зависеть от страницы.',
+              group: ['**/features/**', '**/views/**', '**/stores/**'],
+              message: 'Общий модуль не должен зависеть от пользовательского сценария, страницы или store.',
             },
           ],
         },

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { resetDemo } from '../demo/bootstrap';
-import { notifySaved, notifyUnknownError } from '../services/notifications';
-import { useAppStore } from '../stores/app';
+import { resetDemo } from '../bootstrap';
+import { notifySaved, notifyUnknownError } from '../../../services/notifications';
+import { useAppStore } from '../../../stores/app';
 
 const store = useAppStore();
 const resetting = ref(false);

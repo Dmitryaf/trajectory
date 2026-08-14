@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto';
 import { createPinia, setActivePinia } from 'pinia';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { db } from '../src/db';
-import { useAppStore, type ExportPayload } from '../src/stores/app';
-import { defaultSettings, emptyDailyEntry, emptyWeeklyReview } from '../src/types';
+import { db } from '../../src/db';
+import { useAppStore, type ExportPayload } from '../../src/stores/app';
+import { defaultSettings, emptyDailyEntry, emptyWeeklyReview } from '../../src/types';
 
 beforeEach(async () => {
   await db.delete();

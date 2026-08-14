@@ -1,11 +1,11 @@
 import 'fake-indexeddb/auto';
 import { createPinia, setActivePinia } from 'pinia';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildDemoPayload } from '../scripts/generate-demo-data.mjs';
-import { db } from '../src/db';
-import { bootstrapDemo, resetDemo } from '../src/demo/bootstrap';
-import { useAppStore } from '../src/stores/app';
-import { emptyDailyEntry } from '../src/types';
+import { buildDemoPayload } from '../../../../scripts/generate-demo-data.mjs';
+import { db } from '../../../db';
+import { useAppStore } from '../../../stores/app';
+import { emptyDailyEntry } from '../../../types';
+import { bootstrapDemo, resetDemo } from '../bootstrap';
 
 const anchor = '2026-08-11';
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { BACKUP_VERSION } from '../src/features/backup/version';
-import { normalizeSnapshot } from '../src/features/backup/snapshot';
-import { normalizeDailyEntry, normalizeLifeEvent, normalizeSettings } from '../src/types';
-import { buildDemoPayload, DEMO_BACKUP_VERSION } from '../scripts/generate-demo-data.mjs';
+import { buildDemoPayload, DEMO_BACKUP_VERSION } from '../../scripts/generate-demo-data.mjs';
+import { normalizeSnapshot } from '../../src/features/backup/snapshot';
+import { BACKUP_VERSION } from '../../src/features/backup/version';
+import { normalizeDailyEntry, normalizeLifeEvent, normalizeSettings } from '../../src/types';
 
 const anchor = '2026-08-11';
 

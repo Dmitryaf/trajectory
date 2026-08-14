@@ -6,8 +6,8 @@ import {
   timeBetween,
   validateDailyEntryMetrics,
   validateDailyEntryText,
-} from '../src/features/daily-entry/model';
-import { emptyDailyEntry, type DailyBlockId } from '../src/types';
+} from '../model';
+import { emptyDailyEntry, type DailyBlockId } from '../../../types';
 
 describe('daily entry model', () => {
   it('calculates time in bed across midnight and rejects invalid ranges', () => {

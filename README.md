@@ -86,7 +86,7 @@ See [the architecture overview](docs/architecture.md) for module responsibilitie
 - [Analytics modules](src/features/analytics) keep calculations separate from the interface.
 - [Dexie schema](src/db.ts) and [application store](src/stores/app.ts) show how local data is stored.
 - [Daily-entry feature](src/features/daily-entry) contains the flow for short daily records.
-- [Demo bootstrap](src/demo/bootstrap.ts) and [data generator](scripts/generate-demo-data.mjs) create the same validated starting data every time.
+- [Demo feature](src/features/demo) and [data generator](scripts/generate-demo-data.mjs) create the same validated starting data every time.
 
 ## Local data and reset
 

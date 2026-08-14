@@ -2,10 +2,10 @@
 
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import TodayView from '../src/views/TodayView.vue';
-import { buildDemoPayload } from '../scripts/generate-demo-data.mjs';
-import { normalizeSnapshot } from '../src/features/backup/snapshot';
-import { createStore, routerLinkStub } from './helpers/viewScenario';
+import { buildDemoPayload } from '../../scripts/generate-demo-data.mjs';
+import { normalizeSnapshot } from '../../src/features/backup/snapshot';
+import TodayView from '../../src/views/TodayView.vue';
+import { createStore, routerLinkStub } from '../helpers/viewScenario';
 
 describe('showcase Today surface', () => {
   it('renders the real daily form with synthetic product context', () => {

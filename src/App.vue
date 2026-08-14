@@ -3,8 +3,8 @@ import { onMounted, ref } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 import { Toaster } from 'vue-sonner';
 import 'vue-sonner/style.css';
-import DemoControls from './components/DemoControls.vue';
-import { bootstrapDemo } from './demo/bootstrap';
+import { bootstrapDemo } from './features/demo/bootstrap';
+import DemoControls from './features/demo/ui/DemoControls.vue';
 import { useAppStore } from './stores/app';
 
 const store = useAppStore();

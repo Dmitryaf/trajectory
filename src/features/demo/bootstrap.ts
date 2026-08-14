@@ -1,4 +1,4 @@
-import type { useAppStore } from '../stores/app';
+import type { useAppStore } from '../../stores/app';
 
 type AppStore = ReturnType<typeof useAppStore>;
 
