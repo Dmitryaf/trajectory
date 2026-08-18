@@ -1,16 +1,16 @@
 # Trajectory
 
-Trajectory helps people record a few facts about each day, review a week, see changes over time, and choose a useful next step. It does not score days or guess why something happened.
+Trajectory is a reflection and personal analytics product that helps turn short daily observations into careful weekly and longer-term decisions without treating correlation as causation.
 
-![Trajectory weekly reflection](docs/screenshots/trajectory-profile-cover.png)
+> **About this public edition:** This repository contains an interactive demo edition of Trajectory. It uses synthetic data, stores everything locally in IndexedDB, and requires no account. The production product is developed separately and is currently in closed beta with invite-only registration.
+
+**[Open the interactive demo](https://dmitryaf.github.io/trajectory/)**
+
+![Trajectory weekly reflection](docs/screenshots/trajectory-week-review.png)
 
 **Vue 3 · TypeScript · Pinia · Dexie · ECharts · PWA**
 
-**[Open the live demo](https://dmitryaf.github.io/trajectory/)** · [Source code](https://github.com/Dmitryaf/trajectory)
-
-The demo uses synthetic data and stores later changes only in this browser. It does not require an account or connect to the production service.
-
-The main flow is small: record what mattered today, review a completed week, look at longer-term changes, and choose what to do next. Every field is optional. Missing entries stay missing instead of being replaced with guesses.
+The core flow stays intentionally small: record what mattered today, review a completed week, inspect longer-term patterns, and choose a useful next step. Every field is optional, and incomplete data remains visible rather than being filled with assumptions.
 
 ## Why Trajectory
 
@@ -121,4 +121,8 @@ GitHub Actions publishes the validated demo build to GitHub Pages after changes 
 
 ## Public and production editions
 
-This repository contains an interactive public showcase of Trajectory. It presents the three core local-first scenarios — Today, Week, and History — while production authentication, cloud synchronization, the monthly review, journals, settings, backend infrastructure, private data, internal documentation, and private development history remain outside this repository.
+This repository contains the public demo edition of Trajectory. It preserves the core product flows, domain model, analytics, local-first persistence, responsive UI, and representative application architecture.
+
+For privacy and operational reasons, it uses synthetic data and local IndexedDB storage instead of the production infrastructure.
+
+The production edition is developed separately and currently runs as a closed beta with invite-only registration. Authentication, cloud synchronization, backend infrastructure, private user data, internal documentation, and private development history are intentionally not included in this repository.
