@@ -22,6 +22,7 @@ test('bootstraps the synthetic Today state and captures the mobile screen', asyn
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Сегодня', level: 1 })).toBeVisible();
+  await expect(page.getByLabel('Текущая цель')).toContainText('Подготовить короткий доклад');
   await expect(page.getByText('Первый час без уведомлений')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Сбросить демо-данные' })).toBeVisible();
   const navigation = page.locator('.bottom-nav');
@@ -38,15 +39,41 @@ test('bootstraps the synthetic Today state and captures the mobile screen', asyn
   await context.close();
 });
 
-test('persists a daily note in IndexedDB across reloads', async ({ page }) => {
+test('accepts a decimal comma and persists changes in IndexedDB across reloads', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const note = page.getByPlaceholder('Например: после прогулки стало легче собраться с мыслями');
   await note.fill('Synthetic persistence check');
-  await page.locator('.primary-button--save').click();
+  const weight = page.getByLabel('Вес');
+  await weight.fill('88,2');
+  const saveButton = page.locator('.floating-save-button');
+  await expect(saveButton).toContainText('Сохранить изменения');
+  await saveButton.click();
   await expect(page.getByText(/обновлена на устройстве|День сохранён на устройстве/)).toBeVisible();
   await page.reload();
   await expect(note).toHaveValue('Synthetic persistence check');
+  await expect(weight).toHaveValue('88.2');
+});
+
+test('keeps the help dialog open after a pointer gesture from content to backdrop', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Как работает приложение' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Зачем нужна «Траектория»' });
+  await expect(dialog).toBeVisible();
+  await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+
+  const dialogBox = await dialog.boundingBox();
+  const backdropBox = await page.locator('.help-backdrop').boundingBox();
+  expect(dialogBox).not.toBeNull();
+  expect(backdropBox).not.toBeNull();
+  await page.mouse.move(dialogBox!.x + 20, dialogBox!.y + 20);
+  await page.mouse.down();
+  await page.mouse.move(backdropBox!.x + 2, backdropBox!.y + 2);
+  await page.mouse.up();
+  await expect(dialog).toBeVisible();
+
+  await page.getByRole('button', { name: 'Закрыть объяснение' }).click();
+  await expect(dialog).toBeHidden();
 });
 
 test('navigates through Week and Trends and captures representative analytics', async ({ page }) => {

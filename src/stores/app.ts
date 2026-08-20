@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { db } from '../db';
 import { normalizeSnapshot, type ExportPayload } from '../features/backup/snapshot';
 import { BACKUP_VERSION } from '../features/backup/version';
+import { linkLegacyExperimentEntries } from '../features/experiments/model';
 import { plainCopy } from '../services/plain';
 import {
   defaultSettings,
@@ -49,13 +50,18 @@ export const useAppStore = defineStore('app', {
           db.monthlyReviews.toArray(),
           db.settings.get('main'),
         ]);
-        this.dailyEntries = dailyEntries.map(normalizeDailyEntry);
+        const activeSettings = normalizeSettings(settings);
+        const linkedEntries = linkLegacyExperimentEntries(dailyEntries.map(normalizeDailyEntry), activeSettings);
+        this.dailyEntries = linkedEntries;
         this.results = results.map(normalizeResult).sort((a, b) => b.date.localeCompare(a.date));
         this.lifeEvents = lifeEvents.map(normalizeLifeEvent).sort((a, b) => b.date.localeCompare(a.date));
         this.weeklyReviews = weeklyReviews.map(normalizeWeeklyReview);
         this.monthlyReviews = monthlyReviews.map(normalizeMonthlyReview);
-        this.settings = normalizeSettings(settings);
-        await db.settings.put(plainCopy(this.settings));
+        this.settings = activeSettings;
+        await Promise.all([
+          db.settings.put(plainCopy(this.settings)),
+          linkedEntries.length ? db.dailyEntries.bulkPut(plainCopy(linkedEntries)) : Promise.resolve(),
+        ]);
       } catch (error) {
         this.loadError = error instanceof Error ? error.message : 'Не удалось открыть локальное хранилище.';
         throw error;

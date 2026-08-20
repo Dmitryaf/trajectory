@@ -69,7 +69,8 @@
 .today-pulse,
 .recovery-nudge,
 .review-nudge,
-.entry-change-notice {
+.entry-change-notice,
+.current-goal-summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -79,6 +80,26 @@
   border-radius: 18px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.82);
+}
+.current-goal-summary {
+  background: linear-gradient(135deg, #f2faf7, #fbfdfc);
+  border-color: #cfe5dc;
+}
+.current-goal-summary > div {
+  min-width: 0;
+  flex: 1;
+}
+.current-goal-summary strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--navy);
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.current-goal-summary p {
+  margin: 3px 0 0;
+  color: #65736e;
+  font-size: 13px;
 }
 .first-entry-guide {
   display: flex;

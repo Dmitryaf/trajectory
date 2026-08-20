@@ -5,6 +5,7 @@ import { Toaster } from 'vue-sonner';
 import 'vue-sonner/style.css';
 import { bootstrapDemo } from './features/demo/bootstrap';
 import DemoControls from './features/demo/ui/DemoControls.vue';
+import HowItWorksDialog from './features/demo/ui/HowItWorksDialog.vue';
 import { useAppStore } from './stores/app';
 
 const store = useAppStore();
@@ -36,7 +37,10 @@ const navItems = [
         <span class="brand__mark"><i></i></span>
         <span><strong>Траектория</strong><small>факты, а не оценка</small></span>
       </RouterLink>
-      <DemoControls v-if="ready && !loadError" />
+      <div v-if="ready && !loadError" class="header-actions">
+        <HowItWorksDialog />
+        <DemoControls />
+      </div>
     </header>
 
     <main class="app-main">

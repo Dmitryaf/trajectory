@@ -19,6 +19,7 @@ describe('showcase Today surface', () => {
     });
 
     expect(wrapper.get('h1').text()).toBe('Сегодня');
+    expect(wrapper.get('[aria-label="Текущая цель"]').text()).toContain('Подготовить короткий доклад');
     expect(wrapper.text()).toContain('Шаг по текущей цели');
     expect(wrapper.text()).toContain('Первый час без уведомлений');
     expect(wrapper.find('form.checkin-grid').exists()).toBe(true);

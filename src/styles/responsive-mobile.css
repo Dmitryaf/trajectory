@@ -276,18 +276,15 @@
   .checkin-grid--dirty {
     padding-bottom: 64px;
   }
-  .primary-button--save {
-    display: none;
-  }
-  .mobile-save-button {
-    position: fixed;
-    left: 50%;
-    bottom: 76px;
+  .floating-save-button {
+    right: calc(14px + env(safe-area-inset-right, 0px));
+    left: calc(14px + env(safe-area-inset-left, 0px));
     bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     z-index: 19;
-    transform: translateX(-50%);
-    width: calc(100% - 28px);
+    transform: none;
+    width: auto;
     max-width: 680px;
+    margin-inline: auto;
     min-height: 50px;
     display: flex;
     justify-content: space-between;
@@ -295,16 +292,10 @@
     border: 1px solid rgba(140, 225, 191, 0.28);
     box-shadow: 0 14px 34px rgba(16, 45, 44, 0.28);
   }
-  .mobile-save-enter-active,
-  .mobile-save-leave-active {
-    transition:
-      opacity var(--motion-fast) var(--motion-ease),
-      transform var(--motion-fast) var(--motion-ease);
-  }
-  .mobile-save-enter-from,
-  .mobile-save-leave-to {
+  .floating-save-enter-from,
+  .floating-save-leave-to {
     opacity: 0;
-    transform: translate(-50%, 6px);
+    transform: translateY(6px);
   }
   .form-card,
   .result-composer,
@@ -611,5 +602,15 @@
   }
   .coverage-row {
     grid-template-columns: 115px 1fr 42px;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 979px) {
+  .floating-save-button {
+    bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .checkin-grid--dirty {
+    padding-bottom: 152px;
   }
 }

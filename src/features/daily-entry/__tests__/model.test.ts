@@ -19,8 +19,10 @@ describe('daily entry model', () => {
 
   it('normalizes weight without inventing a value', () => {
     expect(normalizeWeight(82.46)).toBe(82.5);
+    expect(normalizeWeight('88,2')).toBe(88.2);
+    expect(normalizeWeight('88.2')).toBe(88.2);
     expect(normalizeWeight(Number.NaN)).toBeNull();
-    expect(normalizeWeight('82.4')).toBeNull();
+    expect(normalizeWeight('88,2 кг')).toBeNull();
     expect(normalizeWeight(null)).toBeNull();
   });
 
@@ -33,6 +35,7 @@ describe('daily entry model', () => {
       focusReviewDate: '2026-08-01',
       externalEvidenceCriterion: ' Внешний результат ',
       nutritionCriterion: ' Обычный режим ',
+      experimentId: 'experiment-demo',
       activeDailyBlocks: ['sleep', 'context', 'movement'] as DailyBlockId[],
     };
 
@@ -46,7 +49,8 @@ describe('daily entry model', () => {
       focusReviewDate: '2026-08-01',
       externalEvidenceCriterion: 'Внешний результат',
       nutritionCriterion: 'Обычный режим',
-      entrySchemaVersion: 3,
+      entrySchemaVersion: 4,
+      experimentId: 'experiment-demo',
       activeDailyBlocksSnapshot: ['sleep', 'context', 'movement'],
     });
     expect(source.focusTitle).toBe('');

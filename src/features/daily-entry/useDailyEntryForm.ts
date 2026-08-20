@@ -3,7 +3,7 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { formatDate, todayKey } from '../../services/dates';
 import { notifyError, notifySaved, notifyUnknownError } from '../../services/notifications';
 import { plainCopy } from '../../services/plain';
-import { emptyDailyEntry, type DailyBlockId, type DailyEntry } from '../../types';
+import { emptyDailyEntry, experimentAppliesToDate, type DailyBlockId, type DailyEntry } from '../../types';
 import type { useAppStore } from '../../stores/app';
 import {
   prepareDailyEntryForSave,
@@ -20,7 +20,7 @@ export function useDailyEntryForm(store: AppStore) {
   const selectedDate = ref(todayKey());
   const sleepDurationMinutes = ref<number | null>(null);
   const timeInBedDurationMinutes = ref<number | null>(null);
-  const weightKg = ref<number | null>(null);
+  const weightKg = ref('');
   const saved = ref(false);
   const saving = ref(false);
   const validationMessage = ref('');
@@ -62,7 +62,7 @@ export function useDailyEntryForm(store: AppStore) {
     Object.assign(form, plainCopy(entry));
     sleepDurationMinutes.value = entry.sleepMinutes;
     timeInBedDurationMinutes.value = entry.timeInBedMinutes;
-    weightKg.value = entry.weightKg;
+    weightKg.value = entry.weightKg === null ? '' : String(entry.weightKg);
     syncingEntry = false;
     lastDerivedTimeInBed = null;
   }
@@ -116,6 +116,7 @@ export function useDailyEntryForm(store: AppStore) {
         focusReviewDate: store.settings.focusReviewDate,
         externalEvidenceCriterion: store.settings.externalEvidenceCriterion,
         nutritionCriterion: store.settings.nutritionGoalCriterion,
+        experimentId: experimentAppliesToDate(store.settings.experiment, selectedDate.value) ? store.settings.experiment.id || null : null,
         activeDailyBlocks: store.settings.activeDailyBlocks,
       },
       !hasSavedEntry.value,

@@ -38,7 +38,6 @@ const {
   sleepDurationMinutes,
   timeInBedDurationMinutes,
   weightKg,
-  saved,
   validationMessage,
   form,
   hasSavedEntry,
@@ -96,6 +95,7 @@ const activeLifeOptions = computed(() => lifeAreaItems.value.filter((option) => 
 const isToday = computed(() => selectedDate.value === todayKey());
 const isFirstEntry = computed(() => store.loaded && store.dailyEntries.length === 0);
 const firstUseTakesPriority = computed(() => false);
+const currentGoalTitle = computed(() => store.settings.activeFocusTitle.trim());
 const hasSelectedFocus = computed(() => Boolean((form.focusTitle || store.settings.activeFocusTitle).trim()));
 const hasRecordedGoalAction = computed(() => form.recordedFields.includes('actionDirection'));
 const showGoalActionChoices = computed(() => hasSelectedFocus.value || hasRecordedGoalAction.value);
@@ -207,6 +207,14 @@ function unmarkRecorded(field: DailyRecordedFieldId) {
         <small>Можно выбрать любой прошедший день</small>
       </label>
     </div>
+
+    <section v-if="isToday" class="current-goal-summary current-goal-summary--demo" aria-label="Текущая цель">
+      <div>
+        <span class="eyebrow">Текущая цель</span>
+        <strong>{{ currentGoalTitle || 'Пока не выбрана' }}</strong>
+        <p v-if="store.settings.focusOutcomeCriterion">Ожидаемый результат: {{ store.settings.focusOutcomeCriterion }}</p>
+      </div>
+    </section>
 
     <section v-if="isFirstEntry && !firstUseTakesPriority" class="first-entry-guide" aria-label="Первая запись">
       <div>
@@ -501,16 +509,7 @@ function unmarkRecorded(field: DailyRecordedFieldId) {
           <div>
             <label class="field-label" for="weight-kg">Вес</label>
             <div class="number-field">
-              <input
-                id="weight-kg"
-                v-model.number="weightKg"
-                type="number"
-                min="30"
-                max="250"
-                step="0.1"
-                inputmode="decimal"
-                placeholder="82.4"
-              />
+              <input id="weight-kg" v-model="weightKg" type="text" inputmode="decimal" autocomplete="off" placeholder="82.4" />
               <span>кг</span>
             </div>
           </div>
@@ -593,17 +592,15 @@ function unmarkRecorded(field: DailyRecordedFieldId) {
           placeholder="Например: после прогулки стало легче собраться с мыслями"
         ></textarea>
       </article>
+    </form>
 
-      <button class="primary-button primary-button--save" type="submit" :disabled="saveButtonDisabled">
-        <span>{{ saveButtonText }}</span
-        ><span>{{ saved ? '✓' : '→' }}</span>
-      </button>
-      <Transition name="mobile-save">
-        <button v-if="isDirty" class="primary-button mobile-save-button" type="submit" :disabled="saveButtonDisabled">
+    <Teleport to="body">
+      <Transition name="floating-save">
+        <button v-if="isDirty" class="primary-button floating-save-button" type="button" :disabled="saveButtonDisabled" @click="save">
           <span>{{ saveButtonText }}</span
           ><span aria-hidden="true">→</span>
         </button>
       </Transition>
-    </form>
+    </Teleport>
   </section>
 </template>

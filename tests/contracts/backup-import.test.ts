@@ -111,7 +111,7 @@ describe('backup import', () => {
     expect(store.weeklyReviews[0].ifThenPlan).toBe('');
     expect(store.weeklyReviews[0].highlights).toEqual(['', '', '']);
     expect(store.weeklyReviews[0].stateContext).toBe('');
-    expect(store.settings.settingsVersion).toBe(13);
+    expect(store.settings.settingsVersion).toBe(14);
     expect(store.settings.firstUse.status).toBe('available');
     expect(store.settings.activeDailyBlocks).toEqual(['sleep', 'context', 'career', 'movement', 'nutrition']);
     expect(store.settings.activeLifeAreas).toEqual(['family']);
@@ -120,7 +120,7 @@ describe('backup import', () => {
     expect(storedDates).toEqual(['2025-02-01']);
 
     const exported = store.exportData();
-    expect(exported.version).toBe(10);
+    expect(exported.version).toBe(11);
     expect(exported).not.toHaveProperty('firstUseFunnel');
     expect(exported.dailyEntries[0].careerStates).toEqual(['external']);
     expect(exported.monthlyReviews).toEqual([]);
@@ -147,7 +147,7 @@ describe('backup import', () => {
     });
 
     const exported = store.exportData();
-    expect(exported.version).toBe(10);
+    expect(exported.version).toBe(11);
     expect(exported.weeklyReviews[0]).toMatchObject({
       highlights: ['Важный разговор изменил планы', 'Появилась новая мысль о проекте', ''],
       stateContext: 'Неделя была тяжёлой из-за болезни и нехватки сна.',
